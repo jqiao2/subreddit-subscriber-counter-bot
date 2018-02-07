@@ -1,4 +1,5 @@
 import praw
+import prawcore
 
 # Make your own profile file with all these variables for oauth 2
 from profile import CLIENT_ID
@@ -15,13 +16,11 @@ def get_sub_count():
     subreddits = open('subreddits.txt')
     for line in subreddits:
         line = line.rstrip('\n')
-        sc = r.subreddit(line).subscribers
-        print(line + ": " + str(sc))
-        # try:
-        #     sc = r.subreddit(line).subscribers
-        #     print(line + ": " + str(sc))
-        # except:
-        #     print(line)
+        try:
+            sc = r.subreddit(line).subscribers
+            print(line + ": " + str(sc))
+        except prawcore.NotFound:
+            print(line)
 
 
 get_sub_count()
