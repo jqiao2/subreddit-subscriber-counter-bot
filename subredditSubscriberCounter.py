@@ -12,7 +12,7 @@ r = praw.Reddit(client_id = CLIENT_ID, client_secret = CLIENT_SECRET, password =
                 user_agent = USERAGENT, username = USERNAME)
 
 
-# test
+# test again
 def get_sub_count():
     subreddits = open('subreddits.txt')
     for line in subreddits:
