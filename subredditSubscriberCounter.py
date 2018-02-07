@@ -15,11 +15,13 @@ def get_sub_count():
     subreddits = open('subreddits.txt')
     for line in subreddits:
         line = line.rstrip('\n')
-        try:
-            sc = r.subreddit(line).subscribers
-            print(line + ": " + str(sc))
-        except:
-            print(line)
+        sc = r.subreddit(line).subscribers
+        print(line + ": " + str(sc))
+        # try:
+        #     sc = r.subreddit(line).subscribers
+        #     print(line + ": " + str(sc))
+        # except:
+        #     print(line)
 
 
 get_sub_count()
