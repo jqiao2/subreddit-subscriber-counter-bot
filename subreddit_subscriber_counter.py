@@ -23,19 +23,19 @@ def mean(nums):
 blacklisted_subreddits = ['ImGoingToHellForThis', 'FiftyFifty', 'MorbidReality',
                           'watchpeopledie', 'DarkNetMarkets', 'gore', 'AskRedditAfterDark',
                           'NSFWFunny', 'MassiveCock', 'Overwatch_Porn', 'futanari', 'rule34']
-filters = ['gone', 'gw', 'hentai', 'wife']
+filters = ['gone', 'gw', 'hentai', 'wife', 'cest']
 
 subreddit_list = []
 subreddits = r.subreddits.popular(limit=2000000)
 for _ in range(20000):
     subreddit = subreddits.next()
-    filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in filters]) and \
-               subreddit.display_name not in blacklisted_subreddits
+    filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in
+                        filters]) and subreddit.display_name not in blacklisted_subreddits
     if subreddit.over18 and filtered:
         subreddit._fetch()
 
         submission_scores = []
-        for submission in subreddit.top(limit=100):
+        for submission in subreddit.top('year', limit=100):
             submission_scores.append(submission.score)
         average_score = mean(submission_scores)
 
