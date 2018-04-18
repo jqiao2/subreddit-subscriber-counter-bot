@@ -8,8 +8,13 @@ from profile import PASSWORD
 from profile import USERAGENT
 from profile import USERNAME
 
-# Reads subreddit names from a .txt file and creates a .csv file with subreddit names
-# and subscriber count.
+# Non-porn NSFW subreddits, add more if you want
+BLACKLISTED_SUBREDDITS = ['ImGoingToHellForThis', 'FiftyFifty', 'MorbidReality',
+                          'watchpeopledie', 'DarkNetMarkets', 'gore', 'AskRedditAfterDark']
+# Add any strings you don't want the subreddit names to contain
+FILTERS = ['gone', 'gw', 'hentai', 'wife', 'cest']
+# Won't process any subreddits with fewer than SUBSCRIBER_THRESHOLD subscribers
+SUBSCRIBER_THRESHOLD = 50000
 
 r = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, password=PASSWORD,
                 user_agent=USERAGENT, username=USERNAME)
@@ -19,19 +24,14 @@ def mean(nums):
     return float(sum(nums)) / max(len(nums), 1)
 
 
-# Non-porn or non- subreddits
-blacklisted_subreddits = ['ImGoingToHellForThis', 'FiftyFifty', 'MorbidReality',
-                          'watchpeopledie', 'DarkNetMarkets', 'gore', 'AskRedditAfterDark',
-                          'NSFWFunny', 'MassiveCock', 'Overwatch_Porn', 'futanari', 'rule34']
-filters = ['gone', 'gw', 'hentai', 'wife', 'cest']
-
 subreddit_list = []
 subreddits = r.subreddits.popular(limit=2000000)
-for _ in range(20000):
+for _ in range(2000000):
     subreddit = subreddits.next()
-    filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in
-                        filters]) and subreddit.display_name not in blacklisted_subreddits
-    if subreddit.over18 and filtered:
+    # filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in
+    #                     filters]) and subreddit.display_name not in blacklisted_subreddits
+    filtered = subreddit.display_name not in BLACKLISTED_SUBREDDITS
+    if subreddit.over18 and filtered and subreddit.subscribers > 50000:
         subreddit._fetch()
 
         submission_scores = []
@@ -44,6 +44,6 @@ for _ in range(20000):
         subreddit_list.append(row)
         print("Processed", subreddit)
 
-subreddit_data_frame = pd.DataFrame(subreddit_list, columns=["Subreddit", "Subscribers",
-                                                             "Active Accounts", "Average Score"])
-subreddit_data_frame.to_csv("subreddits.csv")
+pd.DataFrame(subreddit_list,
+             columns=["Subreddit", "Subscribers", "Active Accounts", "Average Score"]).to_csv(
+    "subreddits.csv")
