@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import praw
 
@@ -10,12 +12,13 @@ from profile import USERNAME
 
 # Non-porn NSFW subreddits, add more if you want
 BLACKLISTED_SUBREDDITS = ['ImGoingToHellForThis', 'FiftyFifty', 'MorbidReality',
-                          'watchpeopledie', 'DarkNetMarkets', 'gore', 'AskRedditAfterDark']
+                          'watchpeopledie', 'DarkNetMarkets', 'gore', 'AskRedditAfterDark',
+                          'DarkNetMarketsNoobs']
 # Add any strings you don't want the subreddit names to contain
 FILTERS = ['gone', 'gw', 'hentai', 'wife', 'cest']
 # Won't process any subreddits with fewer than SUBSCRIBER_THRESHOLD subscribers
 SUBSCRIBER_THRESHOLD = 50000
-
+# Reddit agent
 r = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, password=PASSWORD,
                 user_agent=USERAGENT, username=USERNAME)
 
@@ -24,26 +27,37 @@ def mean(nums):
     return float(sum(nums)) / max(len(nums), 1)
 
 
-subreddit_list = []
+time = str(datetime.now())
 subreddits = r.subreddits.popular(limit=2000000)
-for _ in range(2000000):
-    subreddit = subreddits.next()
-    # filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in
-    #                     filters]) and subreddit.display_name not in blacklisted_subreddits
-    filtered = subreddit.display_name not in BLACKLISTED_SUBREDDITS
-    if subreddit.over18 and filtered and subreddit.subscribers > 50000:
-        subreddit._fetch()
 
-        submission_scores = []
-        for submission in subreddit.top('year', limit=100):
-            submission_scores.append(submission.score)
-        average_score = mean(submission_scores)
+subreddit_list = []
+i = 0
+while True:
+    try:
+        subreddit = subreddits.next()
+    except StopIteration:
+        break
+    print(i, subreddit.display_name, subreddit.subscribers)
+    i += 1
+    row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers}
+    subreddit_list.append(row)
 
-        row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers,
-               "Active Accounts": subreddit.accounts_active, "Average Score": average_score}
-        subreddit_list.append(row)
-        print("Processed", subreddit)
+    # filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in FILTERS]) and \
+    #            subreddit.display_name not in BLACKLISTED_SUBREDDITS
+    # filtered = subreddit.display_name not in BLACKLISTED_SUBREDDITS
+    # if subreddit.over18 and filtered and subreddit.subscribers > 50000:
+    #     subreddit._fetch()
+    #     submission_scores = []
+    #     for submission in subreddit.top('year', limit=100):
+    #         submission_scores.append(submission.score)
+    #     average_score = mean(submission_scores)
+    #     row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers,
+    #            "Active Accounts": subreddit.accounts_active, "Average Score": average_score}
+    #     subreddit_list.append(row)
+    #     print("Processed", subreddit)
 
-pd.DataFrame(subreddit_list,
-             columns=["Subreddit", "Subscribers", "Active Accounts", "Average Score"]).to_csv(
-    "subreddits.csv")
+pd.DataFrame(
+    subreddit_list, columns=["Subreddit", "Subscribers", "Active Accounts", "Average Score"]
+).to_csv(time + " subreddits.csv")
+
+pd.DataFrame(subreddit_list, columns=["Subreddit", "Subscribers"]).to_csv(time + " subreddits.csv")
