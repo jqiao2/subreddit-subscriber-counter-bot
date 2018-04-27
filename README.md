@@ -1,4 +1,4 @@
-# subredditSubscriberCounter
+# subreddit-subscriber-counter-bot
 
 This script runs through Reddit's popular listing generator.
 
