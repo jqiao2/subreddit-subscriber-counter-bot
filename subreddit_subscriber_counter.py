@@ -37,27 +37,21 @@ while True:
         subreddit = subreddits.next()
     except StopIteration:
         break
-    print(i, subreddit.display_name, subreddit.subscribers)
-    i += 1
-    row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers}
-    subreddit_list.append(row)
 
-    # filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in FILTERS]) and \
-    #            subreddit.display_name not in BLACKLISTED_SUBREDDITS
-    # filtered = subreddit.display_name not in BLACKLISTED_SUBREDDITS
-    # if subreddit.over18 and filtered and subreddit.subscribers > 50000:
-    #     subreddit._fetch()
-    #     submission_scores = []
-    #     for submission in subreddit.top('year', limit=100):
-    #         submission_scores.append(submission.score)
-    #     average_score = mean(submission_scores)
-    #     row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers,
-    #            "Active Accounts": subreddit.accounts_active, "Average Score": average_score}
-    #     subreddit_list.append(row)
-    #     print("Processed", subreddit)
+    # filtered = not any([(filter_ in subreddit.display_name.lower()) for filter_ in
+    #                     FILTERS]) and subreddit.display_name not in BLACKLISTED_SUBREDDITS
+    filtered = subreddit.display_name not in BLACKLISTED_SUBREDDITS
+    if subreddit.over18 and filtered and subreddit.subscribers > 50000:
+        subreddit._fetch()
+        submission_scores = []
+        for submission in subreddit.top('year', limit=100):
+            submission_scores.append(submission.score)
+        average_score = mean(submission_scores)
+        row = {"Subreddit": subreddit.display_name, "Subscribers": subreddit.subscribers,
+               "Active Accounts": subreddit.accounts_active, "Average Score": average_score}
+        subreddit_list.append(row)
+        print("Processed", subreddit)
 
 pd.DataFrame(
     subreddit_list, columns=["Subreddit", "Subscribers", "Active Accounts", "Average Score"]
 ).to_csv(time + " subreddits.csv")
-
-pd.DataFrame(subreddit_list, columns=["Subreddit", "Subscribers"]).to_csv(time + " subreddits.csv")
